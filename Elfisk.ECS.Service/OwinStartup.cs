@@ -9,7 +9,7 @@ namespace Elfisk.ECS.Service
     static readonly ILog Logger = LogManager.GetLogger((typeof(OwinStartup)));
 
 
-    public void Configuration(IAppBuilder app)
+    public virtual void Configuration(IAppBuilder app)
     {
       Logger.Debug("Starting OWIN CORS and SignalR");
 

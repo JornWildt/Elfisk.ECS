@@ -2,11 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using CuttingEdge.Conditions;
+using System.Collections.Concurrent;
 
 namespace Elfisk.ECS.Core.Implementation
 {
+  // Not the most impressive solution - but at least thread safe
+
   public class InMemoryEntityRepository : IEntityRepository
   {
+    private static object Locker = new object();
+
     private Dictionary<EntityId, Entity> Entities { get; set; }
 
     private Dictionary<Type, List<IComponent>> Components { get; set; }
@@ -21,23 +26,26 @@ namespace Elfisk.ECS.Core.Implementation
 
     public void AddEntity(Entity e)
     {
-      Condition.Requires(e, nameof(e)).IsNotNull();
-
-      if (Entities.ContainsKey(e.Id))
-        throw new InvalidOperationException($"Cannot add entity with ID {e.Id} twice.");
-
-      Entities[e.Id] = e;
-
-      if (e.Components != null)
+      lock (Locker)
       {
-        foreach (var c in e.Components)
+        Condition.Requires(e, nameof(e)).IsNotNull();
+
+        if (Entities.ContainsKey(e.Id))
+          throw new InvalidOperationException($"Cannot add entity with ID {e.Id} twice.");
+
+        Entities[e.Id] = e;
+
+        if (e.Components != null)
         {
-          if (c != null)
+          foreach (var c in e.Components)
           {
-            Type t = c.GetType();
-            if (!Components.ContainsKey(t))
-              Components[t] = new List<IComponent>();
-            Components[t].Add(c);
+            if (c != null)
+            {
+              Type t = c.GetType();
+              if (!Components.ContainsKey(t))
+                Components[t] = new List<IComponent>();
+              Components[t].Add(c);
+            }
           }
         }
       }
@@ -46,17 +54,20 @@ namespace Elfisk.ECS.Core.Implementation
 
     public void RemoveEntity(EntityId id)
     {
-      Entity entity;
-      if (Entities.TryGetValue(id, out entity))
+      lock (Locker)
       {
-        Entities.Remove(id);
-        foreach (Component c in entity.Components)
+        Entity entity;
+        if (Entities.TryGetValue(id, out entity))
         {
-          if (c != null)
+          Entities.Remove(id);
+          foreach (Component c in entity.Components)
           {
-            Type t = c.GetType();
-            if (Components.ContainsKey(t))
-              Components[t].Remove(c);
+            if (c != null)
+            {
+              Type t = c.GetType();
+              if (Components.ContainsKey(t))
+                Components[t].Remove(c);
+            }
           }
         }
       }
@@ -65,36 +76,48 @@ namespace Elfisk.ECS.Core.Implementation
 
     public Entity GetEntity(EntityId id)
     {
-      if (Entities.ContainsKey(id))
-        return Entities[id];
-      else
-        return null;
+      lock (Locker)
+      {
+        if (Entities.ContainsKey(id))
+          return Entities[id];
+        else
+          return null;
+      }
     }
 
 
     public IEnumerable<Entity> GetAllEntities()
     {
-      return Entities.Values;
+      lock (Locker)
+      {
+        return Entities.Values.ToArray();
+      }
     }
 
 
     public IEnumerable<TC> GetComponents<TC>(EntityId entityId)
     {
-      Entity e = GetEntity(entityId);
-      if (e != null && e.Components != null)
-        return e.Components.OfType<TC>();
-      else
-        return Enumerable.Empty<TC>();
+      lock (Locker)
+      {
+        Entity e = GetEntity(entityId);
+        if (e != null && e.Components != null)
+          return e.Components.OfType<TC>().ToArray();
+        else
+          return Enumerable.Empty<TC>();
+      }
     }
 
 
     public IEnumerable<TC1> GetComponents<TC1>()
       where TC1 : IComponent
     {
-      if (!Components.ContainsKey(typeof(TC1)))
-        return Enumerable.Empty<TC1>();
+      lock (Locker)
+      {
+        if (!Components.ContainsKey(typeof(TC1)))
+          return Enumerable.Empty<TC1>();
 
-      return Components[typeof(TC1)].Cast<TC1>();
+        return Components[typeof(TC1)].Cast<TC1>().ToArray();
+      }
     }
 
 
@@ -102,10 +125,17 @@ namespace Elfisk.ECS.Core.Implementation
       where TC1 : IComponent
       where TC2 : IComponent
     {
-      foreach (var c1 in GetComponents<TC1>())
+      lock (Locker)
       {
-        foreach (var c2 in GetComponents<TC2>(c1.EntityId))
-          yield return new Tuple<TC1, TC2>(c1, c2);
+        List<Tuple<TC1, TC2>> components = new List<Tuple<TC1, TC2>>();
+
+        foreach (var c1 in GetComponents<TC1>())
+        {
+          foreach (var c2 in GetComponents<TC2>(c1.EntityId))
+            components.Add(new Tuple<TC1, TC2>(c1, c2));
+        }
+
+        return components;
       }
     }
   }

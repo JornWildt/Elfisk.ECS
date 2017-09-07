@@ -14,7 +14,7 @@ namespace Elfisk.ECS.Service
   {
     static ILog Logger = LogManager.GetLogger(typeof(GameService));
 
-    IDisposable SignalRHost { get; set; }
+    IDisposable WebHost { get; set; }
 
     IWindsorContainer CastleContainer { get; set; }
 
@@ -30,7 +30,7 @@ namespace Elfisk.ECS.Service
     {
       CastleContainer.Install(FromAssembly.This());
 
-      SignalRHost = WebApp.Start(ServiceAppSettings.SignalRUrl);
+      WebHost = WebApp.Start(ServiceAppSettings.SignalRUrl);
 
       CastleDependencyContainer gameContainer = new CastleDependencyContainer(CastleContainer);
       GameEnvironment env = new GameEnvironment(gameContainer);
@@ -53,7 +53,7 @@ namespace Elfisk.ECS.Service
 
     public bool Stop(HostControl hostControl)
     {
-      SignalRHost.Dispose();
+      WebHost.Dispose();
       CastleContainer.Dispose();
       return true;
     }
