@@ -75,6 +75,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="README.TXT" />
     <Content Include="Script\game.js" />
     <Content Include="Script\messageHandlers.js" />
     <Content Include="Script\pixi.min.js" />

@@ -1,0 +1,1 @@
+﻿Add the folder "Scripts" as a virtual subfolder of the main website in order to use the scripts.
