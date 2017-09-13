@@ -35,6 +35,7 @@ Elfisk.Game = function () {
 
 
   var initialize = function (cfg) {
+    Elfisk.ViewPortManager.registerDisplayElement(cfg.viewElement);
     Elfisk.SpriteManager.initialize(cfg, onLoaded);
   };
 

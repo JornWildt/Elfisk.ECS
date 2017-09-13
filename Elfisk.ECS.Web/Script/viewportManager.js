@@ -1,14 +1,22 @@
 ﻿var Elfisk = Elfisk || {};
 
 Elfisk.ViewPortManager = function () {
+  var displayElementId = null;
+  
   var width = 100;
 
   var height = 100;
 
-  var pixelWidth = $("#gameDisplay").innerWidth();
+  var pixelWidth = 100;
 
-  var pixelHeight = $("#gameDisplay").innerHeight();
+  var pixelHeight = 100;
 
+  var registerDisplayElement = function(id) 
+  { 
+    displayElementId = id; 
+    pixelWidth = $(id).innerWidth();
+    pixelHeight = $(id).innerHeight();
+  }
 
   var positionToPixelX = function (x) {
     return x * (pixelWidth / width);
@@ -22,6 +30,7 @@ Elfisk.ViewPortManager = function () {
 
   var module =
     {
+      registerDisplayElement: registerDisplayElement,
       getPixelWidth: function () { return pixelWidth; },
       getPixelHeight: function () { return pixelHeight; },
       positionToPixelX: positionToPixelX,
