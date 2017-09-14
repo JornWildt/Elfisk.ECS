@@ -46,6 +46,8 @@ Elfisk.Game = function () {
     startRender(cfg);
     if (cfg.onReady != null)
       cfg.onReady();
+
+    gameLoop();
   }
 
 
@@ -61,8 +63,7 @@ Elfisk.Game = function () {
   var module =
     {
       initialize: initialize,
-      getStage: function () { return stage; },
-      runGameLoop: gameLoop
+      getStage: function () { return stage; }
     };
 
   return module;
