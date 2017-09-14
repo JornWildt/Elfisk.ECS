@@ -95,6 +95,16 @@ namespace Elfisk.ECS.Core.Implementation
     }
 
 
+    public TC GetComponent<TC>(EntityId entityId)
+    {
+      Entity e = GetEntity(entityId);
+      if (e != null && e.Components != null)
+        return e.Components.OfType<TC>().FirstOrDefault();
+      else
+        return default(TC);
+    }
+
+
     public IEnumerable<TC> GetComponents<TC>(EntityId entityId)
     {
       lock (Locker)

@@ -13,6 +13,8 @@ namespace Elfisk.ECS.Core
 
     IEnumerable<Entity> GetAllEntities();
 
+    TC1 GetComponent<TC1>(EntityId id);
+
     IEnumerable<TC1> GetComponents<TC1>()
       where TC1 : IComponent;
 
