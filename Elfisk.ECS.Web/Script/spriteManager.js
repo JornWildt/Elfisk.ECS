@@ -52,10 +52,15 @@ Elfisk.SpriteManager = function () {
     return sprites[spriteId];
   }
 
+  var removeSprite = function (spriteId) {
+    Elfisk.Game.getStage().removeChild(sprites[spriteId]);
+  }
+
 
   var module =
   {
     registerImages: registerImages,
+    removeSprite: removeSprite,
     initialize: initialize,
     getTexture: getTexture,
     getOrCreateSprite: getOrCreateSprite

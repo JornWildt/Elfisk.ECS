@@ -13,6 +13,13 @@ Elfisk.MessageHandlers = function () {
   };
 
 
+  var handleRemoveSpriteMessage = function (msg) {
+    //$('#discussion').append('<li>Remove: ' + htmlEncode(msg.SpriteId) + '</li>');
+
+    Elfisk.SpriteManager.removeSprite(msg.SpriteId);
+  };
+
+
   function htmlEncode(value) {
     var encodedValue = $('<div />').text(value).html();
     return encodedValue;
@@ -21,7 +28,8 @@ Elfisk.MessageHandlers = function () {
 
   var module =
     {
-      handleRenderMessage: handleRenderMessage
+      handleRenderMessage: handleRenderMessage,
+      handleRemoveSpriteMessage: handleRemoveSpriteMessage
     };
 
   return module;

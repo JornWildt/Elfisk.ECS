@@ -8,6 +8,7 @@ Elfisk.Game = function () {
     var msgHub = $.connection.gameMessageHub;
 
     msgHub.client.handleRenderMessage = Elfisk.MessageHandlers.handleRenderMessage;
+    msgHub.client.handleRemoveSpriteMessage = Elfisk.MessageHandlers.handleRemoveSpriteMessage;
 
     $.connection.hub.start();
   };
