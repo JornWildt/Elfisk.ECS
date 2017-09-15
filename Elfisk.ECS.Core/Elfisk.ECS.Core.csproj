@@ -59,6 +59,8 @@
     <Compile Include="Implementation\InMemoryEntityRepository.cs" />
     <Compile Include="IPlayersBus.cs" />
     <Compile Include="ISystem.cs" />
+    <Compile Include="Messages\RemoveSpriteMessage.cs" />
+    <Compile Include="Messages\RenderMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
