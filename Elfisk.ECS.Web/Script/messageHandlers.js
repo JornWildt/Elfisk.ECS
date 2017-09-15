@@ -7,7 +7,7 @@ Elfisk.MessageHandlers = function () {
     var x = Elfisk.ViewPortManager.positionToPixelX(msg.X);
     var y = Elfisk.ViewPortManager.positionToPixelY(msg.Y);
 
-    var sprite = Elfisk.SpriteManager.getOrCreateSprite(msg.SpriteId, msg.Texture);
+    var sprite = Elfisk.SpriteManager.getOrCreateSprite(msg.SpriteId, msg.Texture, msg.Label);
     sprite.x = x;
     sprite.y = y;
   };

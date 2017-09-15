@@ -41,11 +41,17 @@ Elfisk.SpriteManager = function () {
   }
 
 
-  var getOrCreateSprite = function (spriteId, textureId) {
+  var getOrCreateSprite = function (spriteId, textureId, label) {
     if (!(spriteId in sprites)) {
       var texture = new PIXI.Texture(textures[textureId].texture, textures[textureId].frame);
       sprites[spriteId] = new PIXI.Sprite(texture);
       sprites[spriteId].scale.set(1, 1);
+      if (label != null) {
+        var text = new PIXI.Text(label, { fill: "#FFFFFF", fontSize: 12 })
+        text.x = -10;
+        text.y = -10;
+        sprites[spriteId].addChild(text);
+      }
       Elfisk.Game.getStage().addChild(sprites[spriteId]);
     }
 

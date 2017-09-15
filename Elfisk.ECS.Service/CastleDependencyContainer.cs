@@ -2,6 +2,8 @@
 using Castle.Windsor;
 using CuttingEdge.Conditions;
 using Elfisk.Commons;
+using Reg = Castle.MicroKernel.Registration;
+
 
 namespace Elfisk.ECS.Service
 {
@@ -14,6 +16,14 @@ namespace Elfisk.ECS.Service
     {
       Condition.Requires(container, nameof(container)).IsNotNull();
       Container = container;
+    }
+
+
+    public void Register<T1, T2>() 
+      where T2 : T1
+      where T1 : class
+    {
+      Container.Register(Reg.Component.For<T1>().ImplementedBy<T2>());
     }
 
 
