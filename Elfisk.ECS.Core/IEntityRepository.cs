@@ -15,6 +15,8 @@ namespace Elfisk.ECS.Core
 
     TC1 GetComponent<TC1>(EntityId id);
 
+    TC1 GetSingletonComponent<TC1>();
+
     IEnumerable<TC1> GetComponents<TC1>()
       where TC1 : IComponent;
 

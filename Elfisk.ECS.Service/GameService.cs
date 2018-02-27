@@ -17,6 +17,8 @@ namespace Elfisk.ECS.Service
 
     protected bool DoRunWebHost { get; set; }
 
+    protected TimeSpan LoopPeriod { get; set; }
+
     protected IDisposable WebHost { get; set; }
 
     protected IWindsorContainer CastleContainer { get; set; }
@@ -26,10 +28,11 @@ namespace Elfisk.ECS.Service
     protected CancellationTokenSource GameLoopCancellationTokenSource { get; set; }
 
 
-    public GameService(IWindsorContainer container, bool doRunWebHost)
+    public GameService(IWindsorContainer container, TimeSpan loopPeriod, bool doRunWebHost)
     {
       Condition.Requires(container, nameof(container)).IsNotNull();
       CastleContainer = container;
+      LoopPeriod = loopPeriod;
       DoRunWebHost = doRunWebHost;
     }
 
@@ -58,7 +61,7 @@ namespace Elfisk.ECS.Service
     private void StartGameLoop()
     {
       CastleDependencyContainer gameContainer = new CastleDependencyContainer(CastleContainer);
-      GameEnvironment env = new GameEnvironment(gameContainer);
+      GameEnvironment env = new GameEnvironment(gameContainer, LoopPeriod);
       GameEngine engine = new GameEngine(env);
 
       Logger.Debug("Start engine loop");

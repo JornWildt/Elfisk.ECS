@@ -104,6 +104,17 @@ namespace Elfisk.ECS.Core.Implementation
         return default(TC);
     }
 
+    public TC1 GetSingletonComponent<TC1>()
+    {
+      lock (Locker)
+      {
+        if (!Components.ContainsKey(typeof(TC1)))
+          return default(TC1);
+
+        return Components[typeof(TC1)].Cast<TC1>().First();
+      }
+    }
+
 
     public IEnumerable<TC> GetComponents<TC>(EntityId entityId)
     {

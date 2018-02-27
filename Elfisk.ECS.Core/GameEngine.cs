@@ -34,7 +34,7 @@ namespace Elfisk.ECS.Core
         foreach (ISystem system in Systems)
           await system.Update(Environment);
 
-        await Task.Delay(500);
+        await Task.Delay(Environment.GameLoopPeriod);
       }
     }
   }
