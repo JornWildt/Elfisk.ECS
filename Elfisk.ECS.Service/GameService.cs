@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Castle.Windsor;
 using Castle.Windsor.Installer;
@@ -12,31 +13,58 @@ namespace Elfisk.ECS.Service
 {
   public class GameService : ServiceControl
   {
-    static ILog Logger = LogManager.GetLogger(typeof(GameService));
+    protected static ILog Logger = LogManager.GetLogger(typeof(GameService));
 
-    IDisposable WebHost { get; set; }
+    protected bool DoRunWebHost { get; set; }
 
-    IWindsorContainer CastleContainer { get; set; }
+    protected IDisposable WebHost { get; set; }
+
+    protected IWindsorContainer CastleContainer { get; set; }
+
+    protected Task GameLoopTask { get; set; }
+
+    protected CancellationTokenSource GameLoopCancellationTokenSource { get; set; }
 
 
-    public GameService(IWindsorContainer container)
+    public GameService(IWindsorContainer container, bool doRunWebHost)
     {
       Condition.Requires(container, nameof(container)).IsNotNull();
       CastleContainer = container;
+      DoRunWebHost = doRunWebHost;
     }
 
 
     public bool Start(HostControl hostControl)
     {
+      Initialize();
+      StartGameLoop();
+      return true;
+    }
+
+
+    protected virtual void Initialize()
+    {
+      Logger.Debug("Installing dependencies");
       CastleContainer.Install(FromAssembly.This());
 
-      WebHost = WebApp.Start(ServiceAppSettings.SignalRUrl);
+      if (DoRunWebHost)
+      {
+        Logger.Debug("Starting web host");
+        WebHost = WebApp.Start(ServiceAppSettings.SignalRUrl);
+      }
+    }
 
+
+    private void StartGameLoop()
+    {
       CastleDependencyContainer gameContainer = new CastleDependencyContainer(CastleContainer);
       GameEnvironment env = new GameEnvironment(gameContainer);
       GameEngine engine = new GameEngine(env);
 
-      Task.Run(async () =>
+      Logger.Debug("Start engine loop");
+
+      GameLoopCancellationTokenSource = new CancellationTokenSource();
+      GameLoopTask = Task.Run(async () =>
       {
         try
         {
@@ -46,15 +74,23 @@ namespace Elfisk.ECS.Service
         {
           Logger.Error(ex);
         }
-      });
-      return true;
+      },
+      GameLoopCancellationTokenSource.Token);
     }
 
 
-    public bool Stop(HostControl hostControl)
+    public virtual bool Stop(HostControl hostControl)
     {
-      WebHost.Dispose();
+      Logger.Info("Stopping service");
+
+      if (GameLoopCancellationTokenSource != null)
+        GameLoopCancellationTokenSource.Cancel();
+
+      if (WebHost != null)
+        WebHost.Dispose();
+
       CastleContainer.Dispose();
+
       return true;
     }
   }
