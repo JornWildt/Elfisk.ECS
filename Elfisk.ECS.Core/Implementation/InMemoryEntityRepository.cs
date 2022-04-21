@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using CuttingEdge.Conditions;
 using System.Collections.Concurrent;
 
 namespace Elfisk.ECS.Core.Implementation
@@ -28,8 +27,6 @@ namespace Elfisk.ECS.Core.Implementation
     {
       lock (Locker)
       {
-        Condition.Requires(e, nameof(e)).IsNotNull();
-
         if (Entities.ContainsKey(e.Id))
           throw new InvalidOperationException($"Cannot add entity with ID {e.Id} twice.");
 
@@ -42,9 +39,18 @@ namespace Elfisk.ECS.Core.Implementation
             if (c != null)
             {
               Type t = c.GetType();
-              if (!Components.ContainsKey(t))
-                Components[t] = new List<IComponent>();
-              Components[t].Add(c);
+              do
+              {
+                if (!Components.ContainsKey(t))
+                  Components[t] = new List<IComponent>();
+                Components[t].Add(c);
+
+                if (typeof(IDerivedComponent).IsAssignableFrom(t))
+                  t = t.BaseType;
+                else
+                  t = null;
+              }
+              while (t != null);
             }
           }
         }
@@ -65,8 +71,17 @@ namespace Elfisk.ECS.Core.Implementation
             if (c != null)
             {
               Type t = c.GetType();
-              if (Components.ContainsKey(t))
-                Components[t].Remove(c);
+              do
+              {
+                if (Components.ContainsKey(t))
+                  Components[t].Remove(c);
+                
+                if (typeof(IDerivedComponent).IsAssignableFrom(t))
+                  t = t.BaseType;
+                else
+                  t = null;
+              }
+              while (t != null);
             }
           }
         }

@@ -1,5 +1,4 @@
 ﻿using System;
-using CuttingEdge.Conditions;
 
 namespace Elfisk.ECS.Core.GameEvents
 {
@@ -10,7 +9,6 @@ namespace Elfisk.ECS.Core.GameEvents
 
     public ActionEvent(Action f)
     {
-      Condition.Requires(f, nameof(f)).IsNotNull();
       F = f;
     }
 

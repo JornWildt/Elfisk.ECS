@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
-using CuttingEdge.Conditions;
 using Elfisk.ECS.Core;
 
 namespace Elfisk.ECS.Core
@@ -16,8 +15,6 @@ namespace Elfisk.ECS.Core
 
     public GameEngine(GameEnvironment environment)
     {
-      Condition.Requires(environment, nameof(environment)).IsNotNull();
-
       Environment = environment;
     }
 
@@ -31,8 +28,10 @@ namespace Elfisk.ECS.Core
       {
         EventQueue.InvokeEvents(Environment);
 
+        // OBS: Not correct usage of Environment.GameLoopPeriod (should calculate actual spent time)
+
         foreach (ISystem system in Systems)
-          await system.Update(Environment);
+          await system.Update(Environment, Environment.GameLoopPeriod);
 
         await Task.Delay(Environment.GameLoopPeriod);
       }
